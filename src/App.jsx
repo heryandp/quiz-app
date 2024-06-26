@@ -10,6 +10,7 @@ const App = () => {
   const [responses, setResponses] = useState({}); // State untuk menyimpan jawaban
   const [questions, setQuestions] = useState([]); // State untuk menyimpan daftar pertanyaan
   const [answeredQuestions, setAnsweredQuestions] = useState([]); // State untuk menyimpan daftar pertanyaan yang sudah dijawab
+  const [onlineUsers, setOnlineUsers] = useState(0); // State untuk menyimpan jumlah pengguna online
 
   useEffect(() => {
     // Ambil data pertanyaan dari JSON dan simpan ke state
@@ -25,9 +26,19 @@ const App = () => {
       }
     });
 
+    // Realtime listener untuk jumlah pengguna online dari Firebase Realtime Database
+    const onlineUsersRef = ref(database, 'onlineUsers');
+    const unsubscribeOnlineUsers = onValue(onlineUsersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setOnlineUsers(data);
+      }
+    });
+
     // Membersihkan listener saat komponen di-unmount
     return () => {
-      unsubscribe(); // Mematikan listener dengan cara yang benar
+      unsubscribe(); // Mematikan listener untuk jawaban dengan cara yang benar
+      unsubscribeOnlineUsers(); // Mematikan listener untuk pengguna online dengan cara yang benar
     };
   }, []);
 
@@ -142,12 +153,19 @@ const App = () => {
     answered: {
       backgroundColor: 'green',
     },
+    onlineUsersIndicator: {
+      color: 'black',
+      marginBottom: '10px',
+    },
   };
 
   return (
     <div style={styles.appContainer}>
       <div>
         <h1 style={styles.header}>Quiz</h1>
+        <div style={styles.onlineUsersIndicator}>
+          Pengguna Online: {onlineUsers}
+        </div>
         {questions.map((q) => (
           <div key={q.id} style={styles.questionContainer} id={`question${q.id}`}>
             <h3 style={styles.questionTitle}>{q.id}. {q.question}</h3>
@@ -175,6 +193,7 @@ const App = () => {
       </div>
       <div style={styles.answeredQuestionsContainer}>
         <h2>Status:</h2>
+        ({answeredQuestions.length}/{questions.length})
         <div style={styles.questionIndicator}>
           {questions.map((q) => (
             <div
@@ -193,6 +212,10 @@ const App = () => {
               {q.id}
             </div>
           ))}
+        </div>
+        <div style={styles.questionIndicator}>
+          <div style={styles.questionNumber}>
+          </div>
         </div>
       </div>
     </div>
