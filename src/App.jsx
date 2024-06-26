@@ -104,6 +104,7 @@ const App = () => {
       listStyleType: 'none',
       padding: 0,
       margin: 0,
+      color: '#fff',
     },
     optionItem: {
       marginBottom: '8px',
@@ -130,6 +131,7 @@ const App = () => {
       display: 'grid',
       gridTemplateColumns: '1fr',
       gap: '3px',
+      color: '#fff',
     },
     questionNumber: {
       padding: '5px',
