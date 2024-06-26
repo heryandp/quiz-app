@@ -147,7 +147,7 @@ const App = () => {
       <div>
         <h1 style={styles.header}>Quiz</h1>
         {questions.map((q) => (
-          <div key={q.id} style={styles.questionContainer}>
+          <div key={q.id} style={styles.questionContainer} id={`question${q.id}`}>
             <h3 style={styles.questionTitle}>{q.id}. {q.question}</h3>
             <ul style={styles.optionsList}>
               {q.options.map((option, optionIndex) => (
@@ -181,7 +181,12 @@ const App = () => {
                 ...styles.questionNumber,
                 ...(answeredQuestions.includes(q.id) ? styles.answered : {}),
               }}
-              onClick={() => document.getElementById(`question${q.id}`).scrollIntoView()}
+              onClick={() => {
+                const questionElement = document.getElementById(`question${q.id}`);
+                if (questionElement) {
+                  questionElement.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
             >
               {q.id}
             </div>
