@@ -77,6 +77,12 @@ const App = () => {
     document.body.removeChild(link);
   };
 
+
+
+  const handleBackToTop = () => {
+    window.scrollTo(0, 0);
+  };
+
   const styles = {
     appContainer: {
       display: 'grid', // Mengubah layout menjadi grid
@@ -157,15 +163,28 @@ const App = () => {
       color: 'black',
       marginBottom: '10px',
     },
+    backToTopButton: {
+      position: 'fixed',
+      bottom: '20px',
+      right: '20px',
+      backgroundColor: '#007bff',
+      color: '#fff',
+      border: 'none',
+      padding: '10px 20px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      zIndex: '1000',
+    },
   };
 
   return (
     <div style={styles.appContainer}>
       <div>
         <h1 style={styles.header}>Quiz</h1>
-        <div style={styles.onlineUsersIndicator}>
+        {/* <div style={styles.onlineUsersIndicator}>
           Pengguna Online: {onlineUsers}
-        </div>
+        </div> */}
         {questions.map((q) => (
           <div key={q.id} style={styles.questionContainer} id={`question${q.id}`}>
             <h3 style={styles.questionTitle}>{q.id}. {q.question}</h3>
@@ -218,6 +237,9 @@ const App = () => {
           </div>
         </div>
       </div>
+      <button style={styles.backToTopButton} onClick={handleBackToTop}>
+        Kembali ke Atas
+      </button>
     </div>
   );
 };
