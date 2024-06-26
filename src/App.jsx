@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { database } from './firebase'; // Import Firebase database instance
-import { ref, onValue, set } from 'firebase/database'; // Import modular
+import { ref, onValue, set, remove } from 'firebase/database'; // Import modular
 import questionsData from './questions.json'; // Import data from JSON file
 
 const App = () => {
@@ -11,6 +11,7 @@ const App = () => {
   const [questions, setQuestions] = useState([]); // State untuk menyimpan daftar pertanyaan
   const [answeredQuestions, setAnsweredQuestions] = useState([]); // State untuk menyimpan daftar pertanyaan yang sudah dijawab
   const [onlineUsers, setOnlineUsers] = useState(0); // State untuk menyimpan jumlah pengguna online
+  const [flaggedQuestions, setFlaggedQuestions] = useState([]); // State untuk menyimpan daftar pertanyaan yang di-flagging
 
   useEffect(() => {
     // Ambil data pertanyaan dari JSON dan simpan ke state
@@ -54,6 +55,30 @@ const App = () => {
     set(responseRef, answer); // Use the `set` function from the modular import
   };
 
+  const handleResetResponse = (questionId) => {
+    // Reset jawaban untuk pertanyaan tertentu
+    setResponses((prevResponses) => {
+      const newResponses = { ...prevResponses };
+      delete newResponses[questionId];
+      return newResponses;
+    });
+
+    // Hapus jawaban dari Firebase Realtime Database
+    const responseRef = ref(database, `responses/${questionId}`);
+    remove(responseRef); // Use the `remove` function from the modular import
+  };
+
+  const handleFlagQuestion = (questionId) => {
+    // Tambahkan atau hapus pertanyaan dari daftar yang di-flagging
+    setFlaggedQuestions((prevFlaggedQuestions) => {
+      if (prevFlaggedQuestions.includes(questionId)) {
+        return prevFlaggedQuestions.filter(id => id !== questionId);
+      } else {
+        return [...prevFlaggedQuestions, questionId];
+      }
+    });
+  };
+
   const handleExportToTxt = () => {
     let resultText = '';
     questions.forEach((q) => {
@@ -76,8 +101,6 @@ const App = () => {
     link.click();
     document.body.removeChild(link);
   };
-
-
 
   const handleBackToTop = () => {
     window.scrollTo(0, 0);
@@ -153,11 +176,13 @@ const App = () => {
     questionNumber: {
       padding: '5px',
       cursor: 'pointer',
-      // borderRadius: '50%',
       backgroundColor: '#ccc',
     },
     answered: {
       backgroundColor: 'green',
+    },
+    flagged: {
+      backgroundColor: 'orange', // Warna untuk status yang di-flagging
     },
     onlineUsersIndicator: {
       color: 'black',
@@ -182,9 +207,6 @@ const App = () => {
     <div style={styles.appContainer}>
       <div>
         <h1 style={styles.header}>Quiz</h1>
-        {/* <div style={styles.onlineUsersIndicator}>
-          Pengguna Online: {onlineUsers}
-        </div> */}
         {questions.map((q) => (
           <div key={q.id} style={styles.questionContainer} id={`question${q.id}`}>
             <h3 style={styles.questionTitle}>{q.id}. {q.question}</h3>
@@ -204,6 +226,14 @@ const App = () => {
                 </li>
               ))}
             </ul>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button style={styles.exportButton} onClick={() => handleFlagQuestion(q.id)}>
+                {flaggedQuestions.includes(q.id) ? 'Hapus Flag' : 'Flag'}
+              </button>
+              <button style={styles.exportButton} onClick={() => handleResetResponse(q.id)}>
+                Reset
+              </button>
+            </div>
           </div>
         ))}
         <button style={styles.exportButton} onClick={handleExportToTxt}>
@@ -220,6 +250,7 @@ const App = () => {
               style={{
                 ...styles.questionNumber,
                 ...(answeredQuestions.includes(q.id) ? styles.answered : {}),
+                ...(flaggedQuestions.includes(q.id) ? styles.flagged : {}),
               }}
               onClick={() => {
                 const questionElement = document.getElementById(`question${q.id}`);
@@ -231,10 +262,6 @@ const App = () => {
               {q.id}
             </div>
           ))}
-        </div>
-        <div style={styles.questionIndicator}>
-          <div style={styles.questionNumber}>
-          </div>
         </div>
       </div>
       <button style={styles.backToTopButton} onClick={handleBackToTop}>
