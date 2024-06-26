@@ -98,6 +98,7 @@ const App = () => {
       fontSize: '1.2rem',
       marginBottom: '10px',
       fontWeight: 'bold',
+      color: '#fff', // Set text color to white
     },
     optionsList: {
       listStyleType: 'none',
